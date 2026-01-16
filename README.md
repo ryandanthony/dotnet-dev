@@ -26,10 +26,10 @@ docker run -it --rm -v $(pwd):/workspace ghcr.io/ryandanthony/dotnet-dev:latest 
 
 ## Image Details
 
-| Component | Version |
-|-----------|---------|
+| Component  | Version                         |
+| ---------- | ------------------------------- |
 | Base Image | Ubuntu 24.04 LTS (Noble Numbat) |
-| .NET SDK | 10.0 |
+| .NET SDK   | 10.0                            |
 
 ## Features
 
@@ -40,13 +40,13 @@ docker run -it --rm -v $(pwd):/workspace ghcr.io/ryandanthony/dotnet-dev:latest 
 
 ## Available Tags
 
-| Tag | Description |
-|-----|-------------|
-| `latest` | Latest stable release from main branch |
-| `x.y.z` | Specific semantic version |
-| `x.y` | Latest patch version for major.minor |
-| `x` | Latest version for major release |
-| `sha-xxxxxxx` | Specific commit build |
+| Tag           | Description                            |
+| ------------- | -------------------------------------- |
+| `latest`      | Latest stable release from main branch |
+| `x.y.z`       | Specific semantic version              |
+| `x.y`         | Latest patch version for major.minor   |
+| `x`           | Latest version for major release       |
+| `sha-xxxxxxx` | Specific commit build                  |
 
 ## Building Locally
 
@@ -65,7 +65,7 @@ This project uses [GitVersion](https://gitversion.net/) for semantic versioning.
 To control version bumps, include these tags in your commit messages:
 
 - `+semver: major` or `+semver: breaking` - Bump major version
-- `+semver: minor` or `+semver: feature` - Bump minor version  
+- `+semver: minor` or `+semver: feature` - Bump minor version
 - `+semver: patch` or `+semver: fix` - Bump patch version
 - `+semver: none` or `+semver: skip` - No version bump
 
@@ -75,7 +75,7 @@ The image is automatically built and published to GitHub Container Registry via 
 
 - **Push to main**: Publishes with `latest` tag and version tags
 - **Pull requests**: Builds but does not publish (validation only)
-- **Tags (v*)**: Publishes release versions
+- **Tags (v\*)**: Publishes release versions
 
 ## Adding Additional .NET SDK Versions
 
@@ -92,4 +92,4 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
 ## License
 
 See [LICENSE](LICENSE) file for details.
-Docker file and build for a dotnet development image. 
+Docker file and build for a dotnet development image.
