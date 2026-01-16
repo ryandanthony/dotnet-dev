@@ -1,0 +1,61 @@
+# =============================================================================
+# GitVersion Configuration
+# =============================================================================
+# Semantic Versioning configuration using GitHubFlow workflow
+# Documentation: https://gitversion.net/docs/reference/configuration
+# =============================================================================
+
+workflow: GitHubFlow/v1
+
+# Starting version number
+next-version: 0.9.0
+
+# Assembly versioning scheme
+assembly-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-scheme: MajorMinorPatch
+
+# Tag prefix pattern (matches v1.0.0 or V1.0.0 or 1.0.0)
+tag-prefix: '[vV]?'
+
+# Commit message patterns for version bumps
+# Use +semver: major, +semver: minor, +semver: patch in commit messages
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+no-bump-message: '\+semver:\s?(none|skip)'
+
+# Update build number in CI
+update-build-number: true
+
+# Mode configuration
+mode: ContinuousDelivery
+
+# Branch-specific configuration
+branches:
+  main:
+    label: ''
+    increment: Patch
+    is-main-branch: true
+    prevent-increment:
+      of-merged-branch: true
+    
+  feature:
+    label: '{BranchName}'
+    increment: Inherit
+    regex: ^features?[\/-](?<BranchName>.+)
+    source-branches:
+      - main
+    
+  pull-request:
+    mode: ContinuousDelivery
+    label: 'pr{Number}'
+    increment: Inherit
+    regex: ^(pull-requests|pull|pr)[\/-](?<Number>\d+)
+    source-branches:
+      - main
+      - feature
+
+# Ignore specific commits or paths
+ignore:
+  sha: []
+  paths: []

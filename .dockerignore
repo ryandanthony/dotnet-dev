@@ -1,0 +1,40 @@
+# =============================================================================
+# Docker Ignore File
+# =============================================================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# GitHub
+.github
+
+# Documentation
+*.md
+!README.md
+LICENSE
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Build outputs
+bin/
+obj/
+
+# Test results
+TestResults/
+coverage/
+
+# Local environment files
+.env
+.env.local
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db
