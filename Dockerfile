@@ -40,10 +40,6 @@ RUN usermod -l devuser ubuntu && \
 # =============================================================================	
 ENV EXEUNTU=1
 
-# Add claude script to PATH (in /usr/bin to avoid conflict with npm's /usr/local/bin/claude)
-COPY claude /usr/bin/claude
-RUN chmod +x /usr/bin/claude
-
 # Set tini as entrypoint for proper signal handling
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
