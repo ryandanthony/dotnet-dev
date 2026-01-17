@@ -15,6 +15,7 @@ LABEL org.opencontainers.image.vendor="ryandanthony"
 
 # exe.dev configuration - tells exe.dev which user to use for SSH
 LABEL exe.dev/login-user="devuser"
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 # =============================================================================
 # Install prerequisites and dependencies
@@ -36,27 +37,18 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
     # Useful development tools
     git \
     sudo \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# =============================================================================	
 
+RUN usermod -l devuser ubuntu && \
+	groupmod -n devuser ubuntu && \
+	mv /home/ubuntu /home/devuser && \
+	usermod -d /home/devuser devuser && \
+	usermod -aG sudo devuser && \
+	echo 'devuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-RUN userdel -r ubuntu 2>/dev/null || true \
-    && useradd -m -s /bin/bash -u 1001 -c "Development user" -G adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev devuser \
-    && echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-# =============================================================================
-# Setup devuser home directory and shell configuration
-# =============================================================================
-# Create standard home directory structure
-RUN mkdir -p /home/devuser/.local/bin \
-    && mkdir -p /home/devuser/.config \
-    && mkdir -p /home/devuser/projects \
-    && mkdir -p /home/devuser/.ssh \
-    && chmod 700 /home/devuser/.ssh
-
-# Create .hushlogin to suppress login messages
 RUN touch /home/devuser/.hushlogin
 
-# Copy bash configuration files
 COPY home/.profile /home/devuser/.profile
 COPY home/.bash_profile /home/devuser/.bash_profile
 COPY home/.bashrc /home/devuser/.bashrc
@@ -104,8 +96,5 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
 # Verify installation
 RUN dotnet --list-sdks && dotnet --list-runtimes
 
-# =============================================================================
-# Final setup - switch to devuser
-# =============================================================================
+ENTRYPOINT ["/usr/bin/tini", "--"]
 USER devuser
-WORKDIR /home/devuser
