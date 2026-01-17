@@ -6,7 +6,7 @@
 # Compatible with exe.dev SSH-based container access
 # =============================================================================
 
-FROM ghcr.io/boldsoftware/exeuntu:main-fe4664e
+FROM ubuntu:24.04
 
 LABEL org.opencontainers.image.title="dotnet-dev"
 LABEL org.opencontainers.image.description=".NET Development Environment"
@@ -19,16 +19,10 @@ LABEL exe.dev/login-user="devuser"
 # exe.dev default proxy ports
 EXPOSE 8000 9999
 
-# exe.dev requires this environment variable for SSH authentication
-ENV EXEUNTU=1
-
-# Prevent interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-
 # =============================================================================
 # Install prerequisites and dependencies
 # =============================================================================
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     wget \
@@ -48,16 +42,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # =============================================================================
-# Create user for exe.dev (UID 1001 required)
+# Create user for exe.dev (UID 1000 required)
 # =============================================================================
 # Ubuntu 24.04 has a default 'ubuntu' user with UID 1000, remove it first
-# Add to same groups as exeuntu base image for compatibility
 RUN userdel -r ubuntu 2>/dev/null || true \
-    && useradd -m -s /bin/bash -u 1001 -c "Development user" -G adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev devuser \
+    && useradd -m -s /bin/bash -u 1000 -c "Development user" devuser \
     && echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-# Create .hushlogin to suppress login messages
-RUN touch /home/devuser/.hushlogin && chown devuser:devuser /home/devuser/.hushlogin
 
 # =============================================================================
 # .NET SDK Installation
