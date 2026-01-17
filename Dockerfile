@@ -51,8 +51,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create user for exe.dev (UID 1000 required)
 # =============================================================================
 # Ubuntu 24.04 has a default 'ubuntu' user with UID 1000, remove it first
+# Add to same groups as exeuntu base image for compatibility
 RUN userdel -r ubuntu 2>/dev/null || true \
-    && useradd -m -s /bin/bash -u 1000 -c "Development user" devuser \
+    && useradd -m -s /bin/bash -u 1000 -c "Development user" -G adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev devuser \
     && echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Create .hushlogin to suppress login messages
