@@ -1,0 +1,13 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Bash/shell files must use LF line endings
+home/.profile text eol=lf
+home/.bash_profile text eol=lf
+home/.bashrc text eol=lf
+home/.bash_logout text eol=lf
+*.sh text eol=lf
+
+# Docker files
+Dockerfile text eol=lf
+.dockerignore text eol=lf

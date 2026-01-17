@@ -35,6 +35,36 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
     sudo \
     && rm -rf /var/lib/apt/lists/*
 
+
+RUN userdel -r ubuntu 2>/dev/null || true \
+    && useradd -m -s /bin/bash -u 1001 -c "Development user" -G adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev devuser \
+    && echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# =============================================================================
+# Setup devuser home directory and shell configuration
+# =============================================================================
+# Create standard home directory structure
+RUN mkdir -p /home/devuser/.local/bin \
+    && mkdir -p /home/devuser/.config \
+    && mkdir -p /home/devuser/projects \
+    && mkdir -p /home/devuser/.ssh \
+    && chmod 700 /home/devuser/.ssh
+
+# Create .hushlogin to suppress login messages
+RUN touch /home/devuser/.hushlogin
+
+# Copy bash configuration files
+COPY home/.profile /home/devuser/.profile
+COPY home/.bash_profile /home/devuser/.bash_profile
+COPY home/.bashrc /home/devuser/.bashrc
+COPY home/.bash_logout /home/devuser/.bash_logout
+
+# Create empty .bashrc.local for user customizations
+RUN touch /home/devuser/.bashrc.local
+
+# Set proper ownership for all home directory contents
+RUN chown -R devuser:devuser /home/devuser
+
 # =============================================================================
 # .NET SDK Installation
 # =============================================================================
@@ -70,3 +100,9 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
 
 # Verify installation
 RUN dotnet --list-sdks && dotnet --list-runtimes
+
+# =============================================================================
+# Final setup - switch to devuser
+# =============================================================================
+USER devuser
+WORKDIR /home/devuser
