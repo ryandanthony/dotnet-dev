@@ -13,6 +13,9 @@ LABEL org.opencontainers.image.description=".NET Development Environment"
 LABEL org.opencontainers.image.source="https://github.com/ryandanthony/dotnet-dev"
 LABEL org.opencontainers.image.vendor="ryandanthony"
 
+# exe.dev configuration - tells exe.dev which user to use for SSH
+LABEL exe.dev/login-user="devuser"
+
 # =============================================================================
 # Install prerequisites and dependencies
 # =============================================================================
