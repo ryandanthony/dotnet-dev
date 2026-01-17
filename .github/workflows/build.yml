@@ -112,6 +112,7 @@ jobs:
             org.opencontainers.image.description=.NET Development Environment
             org.opencontainers.image.version=${{ needs.version.outputs.semVer }}
             org.opencontainers.image.revision=${{ github.sha }}
+            exe.dev/login-user=devuser
 
       - name: Build and push Docker image
         id: build-push
