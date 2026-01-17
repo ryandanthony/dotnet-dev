@@ -13,12 +13,6 @@ LABEL org.opencontainers.image.description=".NET Development Environment"
 LABEL org.opencontainers.image.source="https://github.com/ryandanthony/dotnet-dev"
 LABEL org.opencontainers.image.vendor="ryandanthony"
 
-# exe.dev configuration - tells exe.dev which user to use for SSH
-LABEL exe.dev/login-user="devuser"
-
-# exe.dev default proxy ports
-EXPOSE 8000 9999
-
 # =============================================================================
 # Install prerequisites and dependencies
 # =============================================================================
@@ -40,14 +34,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
     git \
     sudo \
     && rm -rf /var/lib/apt/lists/*
-
-# =============================================================================
-# Create user for exe.dev (UID 1000 required)
-# =============================================================================
-# Ubuntu 24.04 has a default 'ubuntu' user with UID 1000, remove it first
-RUN userdel -r ubuntu 2>/dev/null || true \
-    && useradd -m -s /bin/bash -u 1000 -c "Development user" devuser \
-    && echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # =============================================================================
 # .NET SDK Installation
@@ -84,10 +70,3 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
 
 # Verify installation
 RUN dotnet --list-sdks && dotnet --list-runtimes
-
-# =============================================================================
-# exe.dev requires container to run as root (it manages SSH internally)
-# The exe.dev/login-user label determines which user SSH sessions use
-# =============================================================================
-USER root
-WORKDIR /home/devuser
