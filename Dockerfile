@@ -55,6 +55,9 @@ RUN userdel -r ubuntu 2>/dev/null || true \
     && useradd -m -s /bin/bash -u 1000 -c "Development user" devuser \
     && echo "devuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
+# Create .hushlogin to suppress login messages
+RUN touch /home/devuser/.hushlogin && chown devuser:devuser /home/devuser/.hushlogin
+
 # =============================================================================
 # .NET SDK Installation
 # =============================================================================
