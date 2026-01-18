@@ -1,46 +1,59 @@
-FROM ubuntu:24.04
+FROM ghcr.io/boldsoftware/exeuntu:main
 
-# Switch from dash to bash by default.
-SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
+LABEL org.opencontainers.image.title="dotnet-dev"
+LABEL org.opencontainers.image.description=".NET Development Environment"
+LABEL org.opencontainers.image.source="https://github.com/ryandanthony/dotnet-dev"
+LABEL org.opencontainers.image.vendor="ryandanthony"
 
-# Remove minimization restrictions and install packages with documentation
-# We aim for a usable non-minimal system.
-RUN rm -f /etc/dpkg/dpkg.cfg.d/excludes /etc/dpkg/dpkg.cfg.d/01_nodoc && \
-	apt-get update && \
-	# Pre-configure debconf to avoid interactive prompts
-	echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && \
-	# Pre-configure pbuilder to avoid mirror prompt
-	echo 'pbuilder pbuilder/mirrorsite string http://archive.ubuntu.com/ubuntu' | debconf-set-selections && \
-	# Run unminimize with single 'y' response to restore documentation
-	# Install man-db and reinstall all base packages to get their man pages back
-	DEBIAN_FRONTEND=noninteractive apt-get install -y --reinstall $(dpkg-query -f '${binary:Package} ' -W) && \
-	DEBIAN_FRONTEND=noninteractive apt-get install -y \
-		ca-certificates wget curl \
-		git jq sqlite3 vim lsof iproute2 less \
-		make tree net-tools file build-essential \
-		pipx psmisc bsdmainutils sudo socat \
-		openssh-server openssh-client \
-		iputils-ping socat netcat-openbsd \
-		unzip util-linux rsync \
-		ubuntu-dev-tools \
-        ubuntu-server \
-        ubuntu-standard \
-        tini && \
-	apt-get clean && \
-	rm -rf /var/lib/apt/lists/*
-# =============================================================================	
-# Modify existing ubuntu user (UID 1000) to become devuser user
-RUN usermod -l devuser ubuntu && \
-	groupmod -n devuser ubuntu && \
-	mv /home/ubuntu /home/devuser && \
-	usermod -d /home/devuser devuser && \
-	usermod -aG sudo devuser && \
-	echo 'devuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-# =============================================================================	
+# exe.dev configuration - tells exe.dev which user to use for SSH
+LABEL exe.dev/login-user="devuser"
+
+# exe.dev default proxy ports
+EXPOSE 8000 9999
+
+# exe.dev requires this environment variable for SSH authentication
 ENV EXEUNTU=1
 
-# Set tini as entrypoint for proper signal handling
-ENTRYPOINT ["/usr/bin/tini", "--"]
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 
-# TODO: Set default user to devuser
-USER devuser
+# =============================================================================
+# Install prerequisites and dependencies
+# =============================================================================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    wget \
+    gnupg \
+    lsb-release \
+    apt-transport-https \
+    libc6 \
+    libgcc-s1 \
+    libicu74 \
+    libssl3 \
+    libstdc++6 \
+    zlib1g \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# =============================================================================
+# .NET SDK Installation
+# =============================================================================
+ENV DOTNET_ROOT=/usr/share/dotnet
+ENV PATH="${PATH}:${DOTNET_ROOT}:${DOTNET_ROOT}/tools"
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+RUN mkdir -p ${DOTNET_ROOT}
+
+# Install .NET SDK 10
+RUN curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
+    && chmod +x /tmp/dotnet-install.sh \
+    && /tmp/dotnet-install.sh --channel 10.0 --install-dir ${DOTNET_ROOT} \
+    && rm /tmp/dotnet-install.sh
+
+# Verify installation
+RUN dotnet --list-sdks && dotnet --list-runtimes
+
+USER root
+WORKDIR /home/devuser
