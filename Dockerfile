@@ -55,5 +55,14 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
 # Verify installation
 RUN dotnet --list-sdks && dotnet --list-runtimes
 
+# =============================================================================
+# exe.dev SSH Configuration
+# The exeuntu base image provides SSH, but we ensure it's running
+# =============================================================================
+RUN mkdir -p /run/sshd
+
 USER root
 WORKDIR /home/devuser
+
+# Ensure SSH server starts (exeuntu should have this, but be explicit)
+CMD ["/usr/sbin/sshd", "-D"]
