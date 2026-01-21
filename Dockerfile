@@ -1,4 +1,4 @@
-# Base image: Ubuntu 24.0424.04
+# Base image: Ubuntu 24.04
 FROM ubuntu:24.04
 
 # Build arguments
@@ -79,7 +79,6 @@ RUN rm /etc/systemd/system/multi-user.target.wants/console-setup.service \
       keyboard-setup.service \
       systemd-ask-password-console.path \
       systemd-ask-password-wall.path \
-      ssh.socket \
       plymouth.service \
       plymouth-start.service \
       plymouth-quit.service \
@@ -133,8 +132,7 @@ RUN usermod -l devuser -c "dev user" ubuntu && \
     groupmod -n devuser ubuntu && \
     mv /home/ubuntu /home/devuser && \
     usermod -d /home/devuser devuser && \
-    usermod -aG sudo devuser && \
-    usermod -aG docker devuser && \
+    usermod -aG adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev,docker devuser && \
     sed -i 's/^ubuntu:/devuser:/' /etc/subuid /etc/subgid && \
     echo 'devuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     mkdir -p /var/lib/systemd/linger && \
@@ -187,15 +185,15 @@ USER root
 # Disable MOTD (message of the day) default messages
 RUN rm -rf /etc/update-motd.d/* /etc/motd
 
-# Copy init wrapper script
-COPY init-wrapper.sh /usr/local/bin/init
+# Copy init wrapper script and make executable
+COPY --chmod=755 init-wrapper.sh /usr/local/bin/init
 
 # Expose ports
 # 8000: Default web server port
 EXPOSE 8000/tcp
 
-# Label for login user
-LABEL login-user="devuser"
+# Label for exe.dev login user
+LABEL exe.dev/login-user="devuser"
 
 # Set command to run init wrapper
 CMD ["/usr/local/bin/init"]
