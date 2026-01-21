@@ -142,8 +142,9 @@ RUN usermod -l devuser -c "dev user" ubuntu && \
 ENV EXEUNTU=1
 
 # Create necessary directories for devuser user
-RUN mkdir -p /home/devuser /home/devuser/.config && \
-    chown devuser:devuser /home/devuser /home/devuser/.config
+RUN mkdir -p /home/devuser /home/devuser/.config /home/devuser/.ssh && \
+    chown devuser:devuser /home/devuser /home/devuser/.config /home/devuser/.ssh && \
+    chmod 700 /home/devuser/.ssh
 
 # Copy base configuration files for devuser user
 COPY --chown=devuser:devuser home/ /home/devuser/
