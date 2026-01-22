@@ -140,9 +140,6 @@ RUN usermod -l devuser -c "dev user" ubuntu && \
     mkdir -p /var/lib/systemd/linger && \
     touch /var/lib/systemd/linger/devuser
 
-# Set environment variable to identify this as an exeuntu image
-ENV EXEUNTU=1
-
 # Create necessary directories for devuser user
 RUN mkdir -p /home/devuser /home/devuser/.config && \
     chown devuser:devuser /home/devuser /home/devuser/.config
