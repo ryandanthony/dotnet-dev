@@ -79,6 +79,7 @@ RUN rm /etc/systemd/system/multi-user.target.wants/console-setup.service \
       keyboard-setup.service \
       systemd-ask-password-console.path \
       systemd-ask-password-wall.path \
+      ssh.socket \
       plymouth.service \
       plymouth-start.service \
       plymouth-quit.service \
@@ -127,27 +128,24 @@ RUN rm /etc/systemd/system/multi-user.target.wants/console-setup.service \
     echo 'SystemCallArchitectures=native' >> /etc/systemd/system.conf.d/container-overrides.conf && \
     systemctl set-default multi-user.target
 
-# Set up devuser user (renamed from ubuntu default user)
-RUN usermod -l devuser -c "dev user" ubuntu && \
-    groupmod -n devuser ubuntu && \
-    mv /home/ubuntu /home/devuser && \
-    usermod -d /home/devuser devuser && \
-    usermod -aG adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev,docker devuser && \
-    sed -i 's/^ubuntu:/devuser:/' /etc/subuid /etc/subgid && \
-    echo 'devuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+# Set up exedev user (renamed from ubuntu default user)
+RUN usermod -l exedev -c "dev user" ubuntu && \
+    groupmod -n exedev ubuntu && \
+    mv /home/ubuntu /home/exedev && \
+    usermod -d /home/exedev exedev && \
+    usermod -aG sudo exedev && \
+    usermod -aG docker exedev && \
+    sed -i 's/^ubuntu:/exedev:/' /etc/subuid /etc/subgid && \
+    echo 'exedev ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     mkdir -p /var/lib/systemd/linger && \
-    touch /var/lib/systemd/linger/devuser
+    touch /var/lib/systemd/linger/exedev
 
 # Set environment variable to identify this as an exeuntu image
 ENV EXEUNTU=1
 
-# Create necessary directories for devuser user
-RUN mkdir -p /home/devuser /home/devuser/.config /home/devuser/.ssh && \
-    chown devuser:devuser /home/devuser /home/devuser/.config /home/devuser/.ssh && \
-    chmod 700 /home/devuser/.ssh
-
-# Copy base configuration files for devuser user
-COPY --chown=devuser:devuser home/ /home/devuser/
+# Create necessary directories for exedev user
+RUN mkdir -p /home/exedev /home/exedev/.config && \
+    chown exedev:exedev /home/exedev /home/exedev/.config
 
 # Install development tools
 RUN apt-get update && \
@@ -166,16 +164,16 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Switch to devuser user
-USER devuser
+# Switch to exedev user
+USER exedev
 
 # Set working directory
-WORKDIR /home/devuser
+WORKDIR /home/exedev
 
-# Configure bash environment for devuser user
-RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/devuser/.bashrc && \
-    echo 'export XDG_RUNTIME_DIR="/run/user/$(id -u)"' >> /home/devuser/.bashrc && \
-    echo 'export XDG_RUNTIME_DIR="/run/user/$(id -u)"' >> /home/devuser/.profile
+# Configure bash environment for exedev user
+RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/exedev/.bashrc && \
+    echo 'export XDG_RUNTIME_DIR="/run/user/$(id -u)"' >> /home/exedev/.bashrc && \
+    echo 'export XDG_RUNTIME_DIR="/run/user/$(id -u)"' >> /home/exedev/.profile
 
 # Configure git defaults
 RUN git config --global init.defaultBranch main
@@ -194,7 +192,7 @@ COPY --chmod=755 init-wrapper.sh /usr/local/bin/init
 EXPOSE 8000/tcp
 
 # Label for exe.dev login user
-LABEL exe.dev/login-user="devuser"
+LABEL exe.dev/login-user="exedev"
 
 # Set command to run init wrapper
 CMD ["/usr/local/bin/init"]
